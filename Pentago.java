@@ -1,179 +1,49 @@
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Scanner;
-/**
- * Pentago Game Class.
- * Keeps track of the current board, heuristic value for each piece, and all prior moves.
- * @author Anh Tran
- */
+
 public class Pentago {
 
-    //Current game board
-    private String board;
-    //List of all prior moves
+    private char[] board;
     private LinkedList<String> moves;
-    //If the board signifies a win/tie or not.
-    private boolean endgame;
-    //Gives the winner of the game. 1 for W, 2 for B, 0 for a draw. Random flag otherwise
     private int winner;
+    private boolean endGame;
 
-    //Heuristic values for each piece.
-    private int heuristicW;
-    private int heuristicB;
-
-    /**
-     * Constructor. Creates initial empty gameboard.
-     */
     public Pentago() {
-        char[] temp = new char[36];
-        for(int i = 0; i < temp.length; i++) {
-            temp[i] = '.';
+        board = new char[36];
+        for(int i = 0; i < 36; i++) {
+            board[i] = '.';
         }
-        board = new String(temp);
         moves = new LinkedList<String>();
-
-        endgame = false;
         winner = -1;
-
-        heuristicW = 0;
-        heuristicB = 0;
+        endGame = false;
     }
 
-    //Private constructor. Creates next state of the game board depending on the move.
-    private Pentago(Pentago p1, String newBoard, String newMove, boolean newEndgame, int newWinner, int newHeuristicW, int newHeuristicB) {
+    private Pentago(Pentago p1, char[] newBoard, String newMove, boolean newEndgame, int newWinner) {
         board = newBoard;
+        //Casting with abandon
         moves = (LinkedList<String>)p1.moves.clone();
         p1.getMoves().removeLast();
-        endgame = newEndgame;
+        endGame = newEndgame;
         winner = newWinner;
-        if(moves.size() % 2 == 0) {
-            heuristicW = p1.getHeuristicW();
-            heuristicB = p1.getHeuristicB() + newHeuristicB;
-        }
-        else {
-            heuristicW = p1.getHeuristicW() + newHeuristicW;
-            heuristicB = p1.getHeuristicB();
-        }
     }
 
-    /**
-     * Returns the heuristic of the game board for the white piece.
-     * @return Heuristic value for player 1.
-     */
-    public int getHeuristicW() {
-        return heuristicW;
+    public char[] getBoard() {
+        return board;
     }
 
-    /**
-     * Returns the heuristic of the game board for the black piece.
-     * @return Heuristic value for player 2.
-     */
-    public int getHeuristicB() {
-        return heuristicB;
-    }
-
-    /**
-     * Returns the list of all prior moves.
-     * @return LinkedList of moves.
-     */
     public LinkedList<String> getMoves() {
         return moves;
     }
 
-    /**
-     * Returns int flag for winner value.
-     * @return Returns 1 for player 1 win, 2 for player 2 win, 0 for a tie.
-     */
     public int getWinner() {
         return winner;
     }
 
-    /**
-     * Gets the current game board.
-     * @return Current game board as a String.
-     */
-    public String getBoard() {
-        return board;
+    public boolean isEndGame() {
+        return endGame;
     }
 
-    /**
-     * Determines if the game has ended.
-     * @return True if the game is in the end state. False otherwise.
-     */
-    public boolean isEndgame() {
-        return endgame;
-    }
-
-    public void setPentago(Pentago p) {
-        board = p.board;
-        //casting with abandon
-        moves = (LinkedList<String>)p.moves.clone();
-        heuristicW = p.heuristicW;
-        heuristicB = p.heuristicW;
-        winner = p.winner;
-        endgame = p.endgame;
-    }
-
-    //Rotates the game board left at the given quadrant.
-    private String rotateLeft(int quadrant, String board) {
-        char[] temp = board.toCharArray();
-        int i = 0;
-        int j = 0;
-        switch (quadrant) {
-            case 1: break;
-            case 2: i += 3;
-                j += 3;
-                break;
-            case 3: i += 18;
-                j += 18;
-                break;
-            case 4: i += 21;
-                j += 21;
-                break;
-        }
-        temp[0 + i] = board.charAt(2 + j);
-        temp[1 + i] = board.charAt(8 + j);
-        temp[2 + j] = board.charAt(14 + j);
-        temp[6 + i] = board.charAt(1 + j);
-        temp[7 + i] = board.charAt(7 + j);
-        temp[8 + i] = board.charAt(13 + j);
-        temp[12 + i] = board.charAt(0 + j);
-        temp[13 + i] = board.charAt(6 + j);
-        temp[14 + i] = board.charAt(12 + j);
-
-        return new String(temp);
-    }
-
-    //Rotates the game board right at the given quadrant.
-    private String rotateRight(int quadrant, String board) {
-        char[] temp = board.toCharArray();
-        int i = 0;
-        int j = 0;
-        switch (quadrant) {
-            case 1: break;
-            case 2: i += 3;
-                j += 3;
-                break;
-            case 3: i += 18;
-                j += 18;
-                break;
-            case 4: i += 21;
-                j += 21;
-                break;
-        }
-        temp[0 + i] = board.charAt(12 + j);
-        temp[1 + i] = board.charAt(6 + j);
-        temp[2 + j] = board.charAt(0 + j);
-        temp[6 + i] = board.charAt(13 + j);
-        temp[7 + i] = board.charAt(7 + j);
-        temp[8 + i] = board.charAt(1 + j);
-        temp[12 + i] = board.charAt(14 + j);
-        temp[13 + i] = board.charAt(8 + j);
-        temp[14 + i] = board.charAt(2 + j);
-
-        return new String(temp);
-    }
-
-    //Determines which game piece is put on the board.
     public char gamePiece() {
         if(moves.size() % 2 == 0)
             return 'b';
@@ -181,16 +51,37 @@ public class Pentago {
             return 'w';
     }
 
-    /**
-     * Puts the game piece and rotates board.
-     * @param move String signifying next move.
-     * @return Game board of next move. Null if move is invalid.
-     */
+    //Rotates the game board left at the given quadrant.
+    private void rotateLeft(int offset, char temp[]) {
+        char[] board = Arrays.copyOf(temp, 36);
+        temp[0 + offset] = board[2 + offset];
+        temp[1 + offset] = board[8 + offset];
+        temp[2 + offset] = board[14 + offset];
+        temp[6 + offset] = board[1 + offset];
+        temp[7 + offset] = board[7 + offset];
+        temp[8 + offset] = board[13 + offset];
+        temp[12 + offset] = board[0 + offset];
+        temp[13 + offset] = board[6 + offset];
+        temp[14 + offset] = board[12 + offset];
+    }
+
+    //Rotates the game board right at the given quadrant.
+    private void rotateRight(int offset, char[] temp) {
+        char[] board = Arrays.copyOf(temp, 36);
+        temp[0 + offset] = board[12 + offset];
+        temp[1 + offset] = board[6 + offset];
+        temp[2 + offset] = board[0 + offset];
+        temp[6 + offset] = board[13 + offset];
+        temp[7 + offset] = board[7 + offset];
+        temp[8 + offset] = board[1 + offset];
+        temp[12 + offset] = board[14 + offset];
+        temp[13 + offset] = board[8 + offset];
+        temp[14 + offset] = board[2 + offset];
+    }
+
     public Pentago move(String move) {
-        //System.out.println(move);
-        //Checks if gameboard is full.
         if(moves.size() == 36) {
-            endgame = true;
+            endGame = true;
             return this;
         }
         int board = 0;
@@ -239,45 +130,125 @@ public class Pentago {
                 break;
         }
         //Checks if position is already occupied.
-        if(this.board.charAt(pos) != '.') {
-            //System.out.println(this.board.charAt(pos));
-            //System.out.println("Position occupied. No moves made.");
+        if(this.board[pos] != '.') {
             moves.removeLast();
             return null;
         }
-        //start move
-        String newBoard;
+        //Start move
+        char[] newBoard;
         boolean newEndgame = false;
         //Places game piece.
-        char[] temp = this.board.toCharArray();
-        temp[pos] = gamePiece();
+        newBoard = Arrays.copyOf(this.board, 36);
+        newBoard[pos] = gamePiece();
+
         //Rotates given quadrant
+        int offset = 0;
+        switch (quadrant) {
+            case 1: break;
+            case 2: offset = 3;
+                break;
+            case 3: offset = 18;
+                break;
+            case 4: offset = 21;
+                break;
+        }
         if(rotate == 'L') {
-            newBoard = rotateLeft(quadrant,new String(temp));
+            rotateLeft(offset, newBoard);
         }
         else {
-            newBoard = rotateRight(quadrant, new String(temp));
+            rotateRight(offset, newBoard);
         }
-        //Calculates heuristic values
-        Point p = winner(newBoard);
-        if(p.win != -1)
+
+        winner = checkWinner(newBoard);
+        if(winner != -1)
             newEndgame = true;
-        int newHeuristicW = p.utilW * p.utilW;
-        int newHeuristicB = p.utilB * p.utilB;
-        if(newHeuristicW == 25) {
-            newHeuristicW = 100;
-        }
-        if(newHeuristicB == 25) {
-            newHeuristicB = 100;
-        }
-        return new Pentago(this, newBoard, move, newEndgame, p.win, newHeuristicW, newHeuristicB);
+        return new Pentago(this, newBoard, move, endGame, winner);
     }
 
-    /**
-     * Prints out game board in a formatted string.
-     */
+    private int checkWinner(char[] newBoard) {
+        int countW = 0;
+        int countB = 0;
+        for(int i = 0; i < newBoard.length; i++) {
+            if(newBoard[i] == 'w') {
+                int temp = check(i, 'w', newBoard);
+                if(temp > countW)
+                    countW = temp;
+            }
+            if(newBoard[i] == 'b') {
+                int temp = check(i, 'b', newBoard);
+                if(temp > countB)
+                    countB = temp;
+            }
+        }
+        return detWinner(countB,countW);
+    }
+
+    private int check(int index, char ch, char[] board) {
+        int max = 0;
+        int count = 0;
+        int i = 0;
+        //Checks for pieces in a row
+        do {
+            if(board[index + i] == ch) {
+                count++;
+                i++;
+            }
+            else
+                break;
+        } while(index + i < board.length && (index + i) % 6 != 0);
+        if(count > max)
+            max = count;
+        count = 0;
+        i = 0;
+        //Checks for pieces in a forwards diagonal
+        do {
+            if(board[index + i] == ch) {
+                count++;
+                i += 5;
+            }
+            else
+                break;
+        } while(index + i < board.length && (index + i) % 6 != 0);
+        if(count > max)
+            max = count;
+        count = 0;
+        i = 0;
+        //Checks for pieces in a column
+        for(int j = 0; index + j < board.length; j += 6) {
+            if(board[index + j] == ch)
+                count++;
+            else
+                break;
+        }
+        if(count > max)
+            max = count;
+        count = 0;
+        //Checks for pieces in a backwards diagonal
+        do {
+            if(board[index + i] == ch) {
+                count++;
+                i += 7;
+            }
+            else
+                break;
+        } while(index + i < board.length && (index + i) % 6 != 0);
+        if(count > max)
+            max = count;
+        return max;
+    }
+
+    private int detWinner(int countB, int countW) {
+        if(countW >= 5 && countB >= 5)
+            return 0;
+        if(countB >= 5 && countW < countB)
+            return 2;
+        if(countW >= 5 && countB < countW)
+            return 1;
+        return -1;
+    }
+
     public void print() {
-        for(int i = 0; i < board.length(); i++) {
+        for(int i = 0; i < board.length; i++) {
             if(i % 6 == 3)
                 System.out.print(" |");
             if(i % 6 == 0) {
@@ -291,122 +262,11 @@ public class Pentago {
                     System.out.println();
                 System.out.print("|");
             }
-            System.out.print(" " + board.charAt(i));
+            System.out.print(" " + board[i]);
             if(i % 6 == 5)
                 System.out.print(" |");
         }
         System.out.println();
         System.out.println("+-------+-------+");
     }
-
-    //Determines winner of the given game board.
-    private Point winner(String board) {
-        int countW = 0;
-        int countB = 0;
-        for(int i = 0; i < board.length(); i++) {
-            if(board.charAt(i) == 'w') {
-                int temp = check(i, 'w', board);
-                if(temp > countW)
-                    countW = temp;
-            }
-            if(board.charAt(i) == 'b') {
-                int temp = check(i, 'b', board);
-                if(temp > countB)
-                    countB = temp;
-            }
-        }
-        return new Point(countW, countB, detWinner(countB, countW));
-    }
-
-    //Checks for game pieces in a row.
-    private int check(int index, char ch, String board) {
-        int max = 0;
-        int count = 0;
-        int i = 0;
-        //Checks for pieces in a row
-        do {
-            if(board.charAt(index + i) == ch) {
-                count++;
-                i++;
-            }
-            else
-                break;
-        } while(index + i < board.length() && (index + i) % 6 != 0);
-        if(count > max)
-            max = count;
-        count = 0;
-        i = 0;
-        //Checks for pieces in a forwards diagonal
-        do {
-            if(board.charAt(index + i) == ch) {
-                count++;
-                i += 5;
-            }
-            else
-                break;
-        } while(index + i < board.length() && (index + i) % 6 != 0);
-        if(count > max)
-            max = count;
-        count = 0;
-        i = 0;
-        //Checks for pieces in a column
-        for(int j = 0; index + j < board.length(); j += 6) {
-            if(board.charAt(index + j) == ch)
-                count++;
-            else
-                break;
-        }
-        if(count > max)
-            max = count;
-        count = 0;
-        //Checks for pieces in a backwards diagonal
-        do {
-            if(board.charAt(index + i) == ch) {
-                count++;
-                i += 7;
-            }
-            else
-                break;
-        } while(index + i < board.length() && (index + i) % 6 != 0);
-        if(count > max)
-            max = count;
-        return max;
-    }
-
-    //Determines flag for winner.
-    private int detWinner(int countB, int countW) {
-        if(countW >= 5 && countB >= 5)
-            return 0;
-        if(countB >= 5 && countW < countB)
-            return 2;
-        if(countW >= 5 && countB < countW)
-            return 1;
-        return -1;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if(this == obj)
-            return true;
-        Pentago p = (Pentago)obj;
-        if(((Pentago)obj).board.equals(this.board))
-            return true;
-        if(this.board.equals(p.board))
-            return true;
-        return false;
-    }
-
-    //Private class to hold heuristic values.
-    private class Point {
-        int utilW;
-        int utilB;
-        int win;
-
-        public Point(int a, int b, int c) {
-            utilW = a;
-            utilB = b;
-            win = c;
-        }
-    }
-
 }
