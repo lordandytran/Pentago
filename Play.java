@@ -1,6 +1,3 @@
-/**
- * @author Anh Tran
- */
 import java.util.Random;
 import java.util.Scanner;
 import java.util.LinkedList;
@@ -33,7 +30,7 @@ public class Play {
         p1.print();
         System.out.println();
 
-        while(!p1.isEndgame()) {
+        while(!p1.isEndGame()) {
             MiniMax m2 = new MiniMax(2, p1);
             m2.alphabeta(m2.getCurrTree(), m2.getDepth(), Integer.MIN_VALUE, Integer.MAX_VALUE, true);
             list2 = m2.getListmove();
@@ -84,13 +81,13 @@ public class Play {
             System.out.println();
         }
         int nodes = 0;
-        MiniMax m = new MiniMax(1, p1);
+        MiniMax m = new MiniMax(2, p1);
         m.minimax(m.getCurrTree(), m.getDepth(), true);
         //list = m.getListmove();
         //nodes += m.nodes;
         System.out.println(nodes);
 
-        while(!p1.isEndgame()) {
+        while(!p1.isEndGame()) {
             System.out.print("Enter move: ");
             String in = scan.nextLine();
             while(p1.move(in) == null) {
@@ -149,7 +146,7 @@ public class Play {
         list = m.getListmove();
 
 
-        while(!p1.isEndgame()) {
+        while(!p1.isEndGame()) {
             System.out.print("Enter move: ");
             String in = scan.nextLine();
             while(p1.move(in) == null) {

@@ -8,6 +8,7 @@ public class Pentago {
     private LinkedList<String> moves;
     private int winner;
     private boolean endGame;
+    private int heuristic;
 
     public Pentago() {
         board = new char[36];
@@ -17,15 +18,17 @@ public class Pentago {
         moves = new LinkedList<String>();
         winner = -1;
         endGame = false;
+        heuristic = 0;
     }
 
-    private Pentago(Pentago p1, char[] newBoard, String newMove, boolean newEndgame, int newWinner) {
+    private Pentago(Pentago p1, char[] newBoard, String newMove, boolean newEndgame, int newWinner, int newHeuristic) {
         board = newBoard;
         //Casting with abandon
         moves = (LinkedList<String>)p1.moves.clone();
         p1.getMoves().removeLast();
         endGame = newEndgame;
         winner = newWinner;
+        heuristic = newHeuristic;
     }
 
     public char[] getBoard() {
@@ -44,6 +47,10 @@ public class Pentago {
         return endGame;
     }
 
+    public int getHeuristic() {
+        return heuristic;
+    }
+
     public char gamePiece() {
         if(moves.size() % 2 == 0)
             return 'b';
@@ -51,16 +58,20 @@ public class Pentago {
             return 'w';
     }
 
+    public int generateHeuristic(char piece) {
+        return 0;
+    }
+
     //Rotates the game board left at the given quadrant.
     private void rotateLeft(int offset, char temp[]) {
         char[] board = Arrays.copyOf(temp, 36);
-        temp[0 + offset] = board[2 + offset];
+        temp[offset] = board[2 + offset];
         temp[1 + offset] = board[8 + offset];
         temp[2 + offset] = board[14 + offset];
         temp[6 + offset] = board[1 + offset];
         temp[7 + offset] = board[7 + offset];
         temp[8 + offset] = board[13 + offset];
-        temp[12 + offset] = board[0 + offset];
+        temp[12 + offset] = board[offset];
         temp[13 + offset] = board[6 + offset];
         temp[14 + offset] = board[12 + offset];
     }
@@ -68,9 +79,9 @@ public class Pentago {
     //Rotates the game board right at the given quadrant.
     private void rotateRight(int offset, char[] temp) {
         char[] board = Arrays.copyOf(temp, 36);
-        temp[0 + offset] = board[12 + offset];
+        temp[offset] = board[12 + offset];
         temp[1 + offset] = board[6 + offset];
-        temp[2 + offset] = board[0 + offset];
+        temp[2 + offset] = board[offset];
         temp[6 + offset] = board[13 + offset];
         temp[7 + offset] = board[7 + offset];
         temp[8 + offset] = board[1 + offset];
@@ -137,6 +148,8 @@ public class Pentago {
         //Start move
         char[] newBoard;
         boolean newEndgame = false;
+        int newHeuristic;
+
         //Places game piece.
         newBoard = Arrays.copyOf(this.board, 36);
         newBoard[pos] = gamePiece();
@@ -159,13 +172,16 @@ public class Pentago {
             rotateRight(offset, newBoard);
         }
 
-        winner = checkWinner(newBoard);
+        Point p = checkWinner(newBoard, gamePiece());
+        newHeuristic = p.x * p.x * p.x;
+        winner = p.y;
         if(winner != -1)
             newEndgame = true;
-        return new Pentago(this, newBoard, move, endGame, winner);
+
+        return new Pentago(this, newBoard, move, endGame, winner, newHeuristic);
     }
 
-    private int checkWinner(char[] newBoard) {
+    private Point checkWinner(char[] newBoard, char ch) {
         int countW = 0;
         int countB = 0;
         for(int i = 0; i < newBoard.length; i++) {
@@ -180,7 +196,10 @@ public class Pentago {
                     countB = temp;
             }
         }
-        return detWinner(countB,countW);
+        if(ch == 'w')
+            return new Point(countW, detWinner(countB,countW));
+        else
+            return new Point(countB, detWinner(countB,countW));
     }
 
     private int check(int index, char ch, char[] board) {
@@ -247,6 +266,18 @@ public class Pentago {
         return -1;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj)
+            return true;
+        Pentago p = (Pentago)obj;
+        if(Arrays.equals(((Pentago)obj).board, this.board))
+            return true;
+        if(Arrays.equals(this.board, p.board))
+            return true;
+        return false;
+    }
+
     public void print() {
         for(int i = 0; i < board.length; i++) {
             if(i % 6 == 3)
@@ -268,5 +299,15 @@ public class Pentago {
         }
         System.out.println();
         System.out.println("+-------+-------+");
+    }
+
+    private class Point {
+        public int x;
+        public int y;
+
+        public Point(int newX, int newY) {
+            x = newX;
+            y = newY;
+        }
     }
 }

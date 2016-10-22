@@ -1,10 +1,9 @@
-/**
- * @author Anh Tran
- */
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
+
 public class MiniMax {
+
     //Private tree class. Represents the game search tree.
     private class Tree {
         public Pentago curr;
@@ -22,11 +21,11 @@ public class MiniMax {
                 for(int j = 1; j <= 9; j++) {
                     for(int k = 1; k <= 4; k++) {
                         Pentago p1 = curr.move(i + "/" + j + " " + k + "L");
-                        if(p1 != null) {
+                        if(p1 != null && !hs.contains(p1)) {
                             hs.add(p1);
                         }
                         Pentago p2 = curr.move(i + "/" + j + " " + k + "R");
-                        if(p2 != null) {
+                        if(p2 != null && !hs.contains(p2)) {
                             hs.add(p2);
                         }
                     }
@@ -86,7 +85,7 @@ public class MiniMax {
         int val = 0;
         if(depth == 0) {
             listmove = currentTree.curr.getMoves();
-            return currentTree.curr.getHeuristicW();
+            return currentTree.curr.getHeuristic();
         }
         if(player) {
             val = Integer.MIN_VALUE;
@@ -122,7 +121,7 @@ public class MiniMax {
     public int alphabeta(Tree currentTree, int depth, int alpha, int beta, boolean player) {
         if (depth == 0) {
             listmove = currentTree.curr.getMoves();
-            return currentTree.curr.getHeuristicW();
+            return currentTree.curr.getHeuristic();
         }
         if (player) {
             currentTree.generateSucessors();
